@@ -1,0 +1,97 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, roc_curve, roc_auc_score
+
+# Load the dataset
+df = pd.read_csv("your_dataset.csv")  # Replace "your_dataset.csv" with the path to your dataset
+
+# Exploratory Data Analysis (EDA)
+print("Dataset head:")
+print(df.head())
+
+print("\nDataset info:")
+print(df.info())
+
+print("\nSummary statistics:")
+print(df.describe())
+
+# Data Preprocessing
+# Assuming you have identified your target variable and features
+X = df.drop(columns=["target_column"])  # Features
+y = df["target_column"]  # Target variable
+
+# Splitting the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Logistic Regression with Hyperparameter Tuning
+param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100]}
+log_reg = LogisticRegression(max_iter=1000)
+grid_search = GridSearchCV(log_reg, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train_scaled, y_train)
+
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+print("Best Parameters:", best_params)
+print("Best Cross-Validation Score:", best_score)
+
+# Evaluation Metrics
+# Confusion Matrix
+def plot_confusion_matrix(y_true, y_pred):
+    cm = confusion_matrix(y_true, y_pred)
+    sns.heatmap(cm, annot=True, cmap="Blues", fmt="d")
+    plt.title("Confusion Matrix")
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.show()
+
+# Precision, Recall, F1 Score
+def print_precision_recall_f1(y_true, y_pred):
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("F1 Score:", f1)
+
+# ROC Curve and AUC
+def plot_roc_curve(y_true, y_pred_probs):
+    fpr, tpr, thresholds = roc_curve(y_true, y_pred_probs)
+    auc_score = roc_auc_score(y_true, y_pred_probs)
+    plt.plot(fpr, tpr, color='blue', label=f'AUC = {auc_score:.2f}')
+    plt.plot([0, 1], [0, 1], color='red', linestyle='--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.legend()
+    plt.show()
+
+# Logistic Regression Evaluation Metrics
+log_reg_best = LogisticRegression(C=best_params['C'], max_iter=1000)
+log_reg_best.fit(X_train_scaled, y_train)
+
+y_pred_train = log_reg_best.predict(X_train_scaled)
+y_pred_test = log_reg_best.predict(X_test_scaled)
+y_pred_probs = log_reg_best.predict_proba(X_test_scaled)[:, 1]
+
+print("\nLogistic Regression Evaluation Metrics:")
+print("Confusion Matrix:")
+plot_confusion_matrix(y_test, y_pred_test)
+print("Precision, Recall, F1 Score:")
+print_precision_recall_f1(y_test, y_pred_test)
+print("ROC Curve and AUC:")
+plot_roc_curve(y_test, y_pred_probs)
+
+# SSE and MSE
+sse = np.sum((y_test - y_pred_test) ** 2)
+mse = mean_squared_error(y_test, y_pred_test)
+print("\nSSE (Sum of Squared Errors):", sse)
+print("MSE (Mean Squared Error):", mse)
