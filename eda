@@ -1,0 +1,43 @@
+df=df.drop_duplicates()
+df.shape
+df.isnull().sum
+df.drop('Gross',axis=1)
+
+fig, axes = plt.subplots(2, 2, figsize=(16,9))
+sns.boxplot( y='MOVIES', x= 'VOTES', data=df, orient='v' , ax=axes[0, 0])
+sns.boxplot( y='YEAR', x= 'VOTES', data=df, orient='v' , ax=axes[0, 1])
+sns.boxplot( y='GENRE', x= 'VOTES', data=df, orient='v' , ax=axes[1, 0])
+sns.boxplot( y='RATING', x= 'VOTES', data=df, orient='v' , ax=axes[1, 1])
+plt.show()
+
+sns.histplot(df["RATING"], bins=5)
+plt.title("Distribution of Ratings")
+plt.show()
+
+sns.boxplot(x="GENRE", y="RATING", data=df)
+plt.title("Rating Distribution by Genre")
+plt.xticks(rotation=45)
+plt.show()
+
+sns.scatterplot(x="RATING", y="VOTES", data=df)
+plt.title("Rating vs. Votes")
+plt.show()
+
+sns.pairplot(df[['RATING', 'STARS', 'VOTES', 'RunTime']])
+plt.show()
+
+top_movies = df.sort_values(by="RATING", ascending=False).head()
+plt.figure(figsize=(12, 6))
+sns.barplot(x="MOVIES", y="RATING", data=top_movies)
+plt.title("Top 5 Movies by RATING")plt.xticks(rotation=45)
+plt.show()
+
+plt.figure(figsize=(10, 8))
+sns.heatmap(df[['RATING', 'STARS', 'VOTES', 'RunTime']].corr(), annot=True, cmap="coolwarm")
+plt.title("Correlation Heatmap")
+plt.show()
+
+plt.figure(figsize=(10, 10))
+df['GENRE'].value_counts().plot(kind='pie', autopct='%1.1f%%')
+plt.title('Genre Distribution of Movies')
+plt.show()
