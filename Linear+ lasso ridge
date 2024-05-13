@@ -1,0 +1,127 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.metrics import mean_squared_error, confusion_matrix, precision_recall_fscore_support, roc_curve, roc_auc_score
+
+# Load the dataset
+df = pd.read_csv("your_dataset.csv")  # Replace "your_dataset.csv" with the path to your dataset
+
+# Exploratory Data Analysis (EDA)
+print("Dataset head:")
+print(df.head())
+
+print("\nDataset info:")
+print(df.info())
+
+print("\nSummary statistics:")
+print(df.describe())
+
+# Data Preprocessing
+# Assuming you have identified your target variable and features
+X = df.drop(columns=["target_column"])  # Features
+y = df["target_column"]  # Target variable
+
+# Splitting the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Feature scaling (optional, but often recommended for regularization)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Linear Regression
+print("\nLinear Regression:")
+linear_reg = LinearRegression()
+linear_reg.fit(X_train_scaled, y_train)
+
+# Evaluation
+y_pred_train_lr = linear_reg.predict(X_train_scaled)
+y_pred_test_lr = linear_reg.predict(X_test_scaled)
+
+print("Linear Regression - Train MSE:", mean_squared_error(y_train, y_pred_train_lr))
+print("Linear Regression - Test MSE:", mean_squared_error(y_test, y_pred_test_lr))
+
+# Lasso Regression
+print("\nLasso Regression:")
+lasso_reg = Lasso(alpha=0.1)  # You can adjust the alpha hyperparameter
+lasso_reg.fit(X_train_scaled, y_train)
+
+# Evaluation
+y_pred_train_lasso = lasso_reg.predict(X_train_scaled)
+y_pred_test_lasso = lasso_reg.predict(X_test_scaled)
+
+print("Lasso Regression - Train MSE:", mean_squared_error(y_train, y_pred_train_lasso))
+print("Lasso Regression - Test MSE:", mean_squared_error(y_test, y_pred_test_lasso))
+
+# Ridge Regression
+print("\nRidge Regression:")
+ridge_reg = Ridge(alpha=1.0)  # You can adjust the alpha hyperparameter
+ridge_reg.fit(X_train_scaled, y_train)
+
+# Evaluation
+y_pred_train_ridge = ridge_reg.predict(X_train_scaled)
+y_pred_test_ridge = ridge_reg.predict(X_test_scaled)
+
+print("Ridge Regression - Train MSE:", mean_squared_error(y_train, y_pred_train_ridge))
+print("Ridge Regression - Test MSE:", mean_squared_error(y_test, y_pred_test_ridge))
+
+# Confusion Matrix
+def plot_confusion_matrix(y_true, y_pred, title='Confusion Matrix', cmap=plt.cm.Blues):
+    cm = confusion_matrix(y_true, y_pred)
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    plt.xticks([0, 1], ['Negative', 'Positive'])
+    plt.yticks([0, 1], ['Negative', 'Positive'])
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.grid(False)
+    plt.show()
+
+# Precision, Recall, F1 Score
+def print_precision_recall_f1(y_true, y_pred):
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("F1 Score:", f1)
+
+# ROC Curve and AUC
+def plot_roc_curve(y_true, y_pred_probs):
+    fpr, tpr, thresholds = roc_curve(y_true, y_pred_probs)
+    auc_score = roc_auc_score(y_true, y_pred_probs)
+    plt.plot(fpr, tpr, color='blue', label=f'AUC = {auc_score:.2f}')
+    plt.plot([0, 1], [0, 1], color='red', linestyle='--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.legend()
+    plt.show()
+
+# Linear Regression Evaluation Metrics
+print("\nLinear Regression Evaluation Metrics:")
+print("Confusion Matrix:")
+plot_confusion_matrix(y_test, np.round(y_pred_test_lr))
+print("Precision, Recall, F1 Score:")
+print_precision_recall_f1(y_test, np.round(y_pred_test_lr))
+print("ROC Curve and AUC:")
+plot_roc_curve(y_test, y_pred_test_lr)
+
+# Lasso Regression Evaluation Metrics
+print("\nLasso Regression Evaluation Metrics:")
+print("Confusion Matrix:")
+plot_confusion_matrix(y_test, np.round(y_pred_test_lasso))
+print("Precision, Recall, F1 Score:")
+print_precision_recall_f1(y_test, np.round(y_pred_test_lasso))
+print("ROC Curve and AUC:")
+plot_roc_curve(y_test, y_pred_test_lasso)
+
+# Ridge Regression Evaluation Metrics
+print("\nRidge Regression Evaluation Metrics:")
+print("Confusion Matrix:")
+plot_confusion_matrix(y_test, np.round(y_pred_test_ridge))
+print("Precision, Recall, F1 Score:")
+print_precision_recall_f1(y_test, np.round(y_pred_test_ridge))
+print("ROC Curve and AUC:")
