@@ -1,0 +1,50 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+
+# Load the dataset
+df = pd.read_csv("your_dataset.csv")  # Replace "your_dataset.csv" with the path to your dataset
+
+# Exploratory Data Analysis (EDA)
+print("Dataset head:")
+print(df.head())
+
+print("\nDataset info:")
+print(df.info())
+
+print("\nSummary statistics:")
+print(df.describe())
+
+# Data Preprocessing
+# Assuming you have identified your features
+X = df.drop(columns=["target_column"])  # Features
+
+# EDA Plots (optional)
+# For example, you can plot distributions of features
+sns.pairplot(df)
+plt.show()
+
+# KMeans Clustering with Pipeline
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('kmeans', KMeans(n_clusters=3, random_state=42))  # You can adjust the number of clusters as needed
+])
+
+pipeline.fit(X)
+
+# Cluster Centers
+print("Cluster Centers:")
+print(pipeline.named_steps['kmeans'].cluster_centers_)
+
+# SSE (Sum of Squared Errors)
+sse = pipeline.named_steps['kmeans'].inertia_
+print("SSE (Sum of Squared Errors):", sse)
+
+# Silhouette Score (if needed)
+silhouette_avg = silhouette_score(X, pipeline.named_steps['kmeans'].labels_)
+print("Silhouette Score:", silhouette_avg)
